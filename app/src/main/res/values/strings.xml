@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">GroceryList</string>
+    <string name="show_master_list">Show Master List</string>
+    <string name="show_shopping_list">Show Shopping List</string>
+    <string name="add_item">Add Item</string>
+    <string name="clear_all">Clear All</string>
+    <string name="delete_checked">Delete Checked</string>
 </resources>
