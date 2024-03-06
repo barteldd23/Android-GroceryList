@@ -5,4 +5,9 @@
     <string name="add_item">Add Item</string>
     <string name="clear_all">Clear All</string>
     <string name="delete_checked">Delete Checked</string>
+    <string name="add_item_text">Add Item</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="shopping_list">Shopping List</string>
+    <string name="master_list">Master List</string>
 </resources>

@@ -16,7 +16,9 @@ import java.util.ArrayList;
 public class  GroceryItemAdapter extends RecyclerView.Adapter {
     private ArrayList<GroceryItem> groceryData;
     private View.OnClickListener onItemClickListener;
-    public static final String TAG = "ActorAdapter";
+
+    private String screen;
+    public static final String TAG = "GroceryItemAdapter";
 
     private Context parentContext;
 
@@ -49,11 +51,12 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
 
     }
 
-    public GroceryItemAdapter(ArrayList<GroceryItem> data, Context context)
+    public GroceryItemAdapter(ArrayList<GroceryItem> data, Context context, String currentScreen)
     {
         groceryData = data;
         Log.d(TAG, "GrocryItemAdapter: " + data.size());
         parentContext = context;
+        screen = currentScreen;
     }
 
     public void setOnItemClickListener(View.OnClickListener itemClickListener)
@@ -74,15 +77,47 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
         Log.d(TAG, "onBindViewHolder: " + groceryData.get(position));
-        ActorViewHolder actorViewHolder = (ActorViewHolder) holder;
-        actorViewHolder.getTvDescription().setText(groceryData.get(position).getDescription());
-        if(groceryData.get(position).getIsOnShoppingList() == 1)
+
+
+        // Maybe Check for title to do logic for Master or Shopping list.
+        // Maybe two adapters.
+        if(screen == parentContext.getString(R.string.master_list))
         {
-            actorViewHolder.getChkOnShoppingList().setChecked(true);
-        } else
-        {
-            actorViewHolder.getChkOnShoppingList().setChecked(false);
+            // Display Every Item on master List.
+            ActorViewHolder actorViewHolder = (ActorViewHolder) holder;
+            actorViewHolder.getTvDescription().setText(groceryData.get(position).getDescription());
+
+            if(groceryData.get(position).getIsOnShoppingList() == 1)
+            {
+                actorViewHolder.getChkOnShoppingList().setChecked(true);
+            } else
+            {
+                actorViewHolder.getChkOnShoppingList().setChecked(false);
+            }
         }
+        else
+        {
+            // Only display if the item is really on the shopping list.
+            if(groceryData.get(position).getIsOnShoppingList() == 1)
+            {
+                ActorViewHolder actorViewHolder = (ActorViewHolder) holder;
+                actorViewHolder.getTvDescription().setText(groceryData.get(position).getDescription());
+                if(groceryData.get(position).getIsInCart() == 1)
+                {
+                    actorViewHolder.getChkOnShoppingList().setChecked(true);
+                } else
+                {
+                    actorViewHolder.getChkOnShoppingList().setChecked(false);
+                }
+            }
+            else
+            {
+               // actorViewHolder.getTvDescription().setText("Test");
+            }
+
+
+        }
+
 
 
     }

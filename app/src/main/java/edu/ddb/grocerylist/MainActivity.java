@@ -1,11 +1,19 @@
 package edu.ddb.grocerylist;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -23,14 +31,38 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        CreateItems();
+
+        this.setTitle(getString(R.string.master_list));
+        RefreshList();
+
+    }
+
+    private void RefreshList() {
+        // Bind the Recyclerview
+        // Make a new list depending on the screen. Contains only description and whether it is checked.
+
+
+        // RecyclerView is a control on the layout
+        RecyclerView rvItems = findViewById(R.id.rvItems);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        rvItems.setLayoutManager(layoutManager);
+        GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, this, this.getTitle().toString() );
+        //groceryItemAdapter.setOnItemClickListener(onClickListener);
+
+        rvItems.setAdapter(groceryItemAdapter);
+    }
+
+    private void CreateItems() {
+        items = new ArrayList<GroceryItem>();
         GroceryItem item = new GroceryItem("Pizza");
         items.add(item);
         item = new GroceryItem("Bread");
         items.add(item);
         item = new GroceryItem("Cheese",1,0);
         items.add(item);
-
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -47,16 +79,21 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
             //ReadTextFile();
             //Display on screen.
+            this.setTitle(getString(R.string.master_list));
+            RefreshList();
 
         } else if (id == R.id.show_shopping_list)
         {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
             // Display items bool onShoppingList
+            this.setTitle(getString(R.string.shopping_list));
+            RefreshList();
 
         } else if (id == R.id.add_item)
         {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
             // If on master - add to list with item|0|0
+            addItemDialog();
             // If on shopping - add to list with item|1|0
 
         } else if (id == R.id.clear_all)
@@ -73,5 +110,44 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addItemDialog()
+    {
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        final View addItemView = layoutInflater.inflate(R.layout.add_item_view, null);
+
+        // show the dialog to the user modularly.
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.add_item)
+                .setView(addItemView)
+                .setPositiveButton(getString(R.string.ok),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Get
+                                Log.d(TAG, "onClick: OK");
+                                // need this addItemView before.findView because the view we made has the edit text we want.
+                                EditText etItem = addItemView.findViewById(R.id.etAddItem);
+                                String item = etItem.getText().toString();
+
+                                // Need to check if on master list page or not
+                                items.add(new GroceryItem(item));
+                                //items.add(new GroceryItem(item,1,0));
+
+                                // Need to write to file.
+
+                                // Need to repopulate the screen.
+                                RefreshList();
+
+                            }
+                        })
+                .setNegativeButton(getString(R.string.cancel),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Log.d(TAG, "onClick: Cancel");
+                            }
+                        }).show();
     }
 }
