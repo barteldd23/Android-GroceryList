@@ -2,10 +2,13 @@ package edu.ddb.grocerylist;
 
 public class DisplayItem
 {
-    public DisplayItem(String description, int checked)
+    public DisplayItem(String description, int checked, int masterIndex)
     {
         Description = description;
         Checked = checked;
+        MasterIndex = masterIndex;
+
+
     }
     public String getDescription() {
         return Description;
@@ -25,5 +28,15 @@ public class DisplayItem
 
     private String Description;
     private int Checked;
+
+    public int getMasterIndex() {
+        return MasterIndex;
+    }
+
+    public void setMasterIndex(int masterIndex) {
+        this.MasterIndex = masterIndex;
+    }
+
+    private int MasterIndex;
 
 }

@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -31,12 +32,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CreateItems();
+        //CreateItems();
+        //WriteTextFile();
+
+        ReadTextFile();
 
         this.setTitle(getString(R.string.master_list));
         RefreshList();
 
     }
+
+    private CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "onCheckedChanged: From the listener in main activity");
+            WriteTextFile();
+        }
+    };
 
     private View.OnClickListener onClickListener_MasterList = new View.OnClickListener() {
         @Override
@@ -45,12 +57,12 @@ public class MainActivity extends AppCompatActivity {
             CheckBox chkItem = v.findViewById(R.id.chkItem);
 
 
-//            chkItem.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    setMasterList(viewHolder, chkItem);
-//                }
-//            });
+            chkItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    WriteTextFile();
+                }
+            });
 
             setMasterList(viewHolder, chkItem);
 
@@ -85,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         {
             for(GroceryItem item : items)
             {
-                DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsOnShoppingList());
+                DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsOnShoppingList(),items.indexOf(item));
                 displayItems.add(displayItem);
             }
         }else
@@ -94,22 +106,26 @@ public class MainActivity extends AppCompatActivity {
             {
                 if(item.getIsOnShoppingList() == 1)
                 {
-                    DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsInCart());
+                    DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsInCart(),items.indexOf(item));
                     displayItems.add(displayItem);
                 }
             }
         }
 
         // RecyclerView is a control on the layout
+        String screen = this.getTitle().toString();
         RecyclerView rvItems = findViewById(R.id.rvItems);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         rvItems.setLayoutManager(layoutManager);
-        GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, displayItems, this);
+        GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, displayItems, this, screen);
 
-        if(this.getTitle() == getString(R.string.master_list))
-        {
-            groceryItemAdapter.setOnItemClickListener(onClickListener_MasterList);
-        }
+        groceryItemAdapter.setOnCheckedChangeListener(onCheckedChangeListener);
+
+
+//        if(this.getTitle() == getString(R.string.master_list))
+//        {
+//            groceryItemAdapter.setOnItemClickListener(onClickListener_MasterList);
+//        }
 
 
         rvItems.setAdapter(groceryItemAdapter);
@@ -198,8 +214,9 @@ public class MainActivity extends AppCompatActivity {
                                 //items.add(new GroceryItem(item,1,0));
 
                                 // Need to write to file.
-
+                                WriteTextFile();
                                 // Need to repopulate the screen.
+
                                 RefreshList();
 
                             }
@@ -211,5 +228,86 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "onClick: Cancel");
                             }
                         }).show();
+    }
+
+    private void WriteXMLFile()
+    {
+        try
+        {
+            Log.d(TAG, "WriteXMLFile: Start");
+            FileIO fileIO = new FileIO();
+            fileIO.WriteXMLFile(XMLFILENAME, this, items);
+            Log.d(TAG, "WriteXMLFile: End");
+
+        }
+        catch(Exception e)
+        {
+            Log.d(TAG, "WriteXMLFile: " + e.getMessage());
+        }
+
+    }
+
+    private void ReadXMLFile()
+    {
+        try
+        {
+            FileIO fileIO = new FileIO();
+            items = fileIO.ReadFromXMLFile(XMLFILENAME, this);
+            Log.d(TAG, "ReadXMLFile: GroceryItems " + items.size());
+        }
+        catch(Exception e)
+        {
+            Log.d(TAG, "ReadXMLFile: " + e.getMessage());
+        }
+
+    }
+
+    private void WriteTextFile()
+    {
+        try {
+
+            FileIO fileIO = new FileIO();
+            int counter = 0;
+            String[] data = new String[items.size()];
+
+            for(GroceryItem item : items)
+            {
+                data[counter++] = item.toString();
+            }
+            fileIO.writeFile(FILENAME, this, data);
+            Log.d(TAG, "WriteTextFile: " + data.length);
+
+        }
+        catch(Exception e)
+        {
+            Log.d(TAG, "WriteTextFile: " + e.getMessage());
+        }
+    }
+
+    private void ReadTextFile()
+    {
+        try {
+            FileIO fileIO = new FileIO();
+            ArrayList<String> strData = fileIO.readFile(FILENAME, this);
+
+            items = new ArrayList<GroceryItem>();
+
+
+
+            for(String s : strData)
+            {
+                String[] data = s.split("\\|");
+                items.add(new GroceryItem(
+                        data[0],
+                        Integer.parseInt(data[1]),
+                        Integer.parseInt(data[2])));
+                Log.d(TAG, "ReadTextFile: " + items.get(items.size()-1).getDescription());
+            }
+            Log.d(TAG, "ReadTextFile: " + items.size());
+
+        }
+        catch(Exception e){
+            Log.d(TAG, "ReadTextFile: " + e.getMessage());
+        }
     }
 }
