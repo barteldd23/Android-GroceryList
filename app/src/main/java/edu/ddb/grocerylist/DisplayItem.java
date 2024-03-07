@@ -1,8 +1,8 @@
 package edu.ddb.grocerylist;
 
-public class ListItem
+public class DisplayItem
 {
-    public ListItem(String description, int checked)
+    public DisplayItem(String description, int checked)
     {
         Description = description;
         Checked = checked;

@@ -12,8 +12,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -38,17 +38,79 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private View.OnClickListener onClickListener_MasterList = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
+            CheckBox chkItem = v.findViewById(R.id.chkItem);
+
+
+//            chkItem.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    setMasterList(viewHolder, chkItem);
+//                }
+//            });
+
+            setMasterList(viewHolder, chkItem);
+
+        }
+
+        private void setMasterList(RecyclerView.ViewHolder viewHolder, CheckBox chkItem) {
+            // use the index to get an actor
+            int position = viewHolder.getAdapterPosition();
+            GroceryItem item = items.get(position);
+            Log.d(TAG, "onClick: " + item.toString());
+            // add code to startActivity of another activity. i.e. Detail screen.
+
+            if(items.get(position).getIsOnShoppingList() == 0)
+            {
+                items.get(position).setIsOnShoppingList(1);
+                chkItem.setChecked(true);
+
+            }
+            else
+            {
+                items.get(position).setIsOnShoppingList(0);
+                chkItem.setChecked(false);
+            }
+        }
+    };
+
     private void RefreshList() {
         // Bind the Recyclerview
         // Make a new list depending on the screen. Contains only description and whether it is checked.
-
+        ArrayList<DisplayItem> displayItems = new ArrayList<DisplayItem>();
+        if(this.getTitle() == getString(R.string.master_list))
+        {
+            for(GroceryItem item : items)
+            {
+                DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsOnShoppingList());
+                displayItems.add(displayItem);
+            }
+        }else
+        {
+            for(GroceryItem item : items)
+            {
+                if(item.getIsOnShoppingList() == 1)
+                {
+                    DisplayItem displayItem = new DisplayItem(item.getDescription(), item.getIsInCart());
+                    displayItems.add(displayItem);
+                }
+            }
+        }
 
         // RecyclerView is a control on the layout
         RecyclerView rvItems = findViewById(R.id.rvItems);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         rvItems.setLayoutManager(layoutManager);
-        GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, this, this.getTitle().toString() );
-        //groceryItemAdapter.setOnItemClickListener(onClickListener);
+        GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, displayItems, this);
+
+        if(this.getTitle() == getString(R.string.master_list))
+        {
+            groceryItemAdapter.setOnItemClickListener(onClickListener_MasterList);
+        }
+
 
         rvItems.setAdapter(groceryItemAdapter);
     }

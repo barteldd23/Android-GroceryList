@@ -14,21 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class  GroceryItemAdapter extends RecyclerView.Adapter {
-    private ArrayList<GroceryItem> groceryData;
+    private ArrayList<GroceryItem> masterListData;
+    private ArrayList<DisplayItem> displayData;
     private View.OnClickListener onItemClickListener;
 
-    private String screen;
     public static final String TAG = "GroceryItemAdapter";
 
     private Context parentContext;
 
-    public class ActorViewHolder extends RecyclerView.ViewHolder{
+    public class GroceryViewHolder extends RecyclerView.ViewHolder{
         public TextView tvDescription;
         public CheckBox chkOnShoppingList;
 
-        // private View.OnClickListener onClickListener;
+        private View.OnClickListener onClickListener;
 
-        public ActorViewHolder(@NonNull View itemView) {
+        public GroceryViewHolder(@NonNull View itemView) {
             super(itemView);
             tvDescription = itemView.findViewById(R.id.tvItem);
             chkOnShoppingList = itemView.findViewById(R.id.chkItem);
@@ -51,12 +51,12 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
 
     }
 
-    public GroceryItemAdapter(ArrayList<GroceryItem> data, Context context, String currentScreen)
+    public GroceryItemAdapter(ArrayList<GroceryItem> data, ArrayList<DisplayItem> displayList, Context context)
     {
-        groceryData = data;
-        Log.d(TAG, "GrocryItemAdapter: " + data.size());
+        masterListData = data;
+        displayData = displayList;
+        Log.d(TAG, "GrocryItemAdapter: " + displayData.size());
         parentContext = context;
-        screen = currentScreen;
     }
 
     public void setOnItemClickListener(View.OnClickListener itemClickListener)
@@ -70,60 +70,32 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.complex_item_view, parent, false);
-        return new ActorViewHolder(v);
+        return new GroceryViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
-        Log.d(TAG, "onBindViewHolder: " + groceryData.get(position));
+        Log.d(TAG, "onBindViewHolder: " + displayData.get(position));
 
 
         // Maybe Check for title to do logic for Master or Shopping list.
         // Maybe two adapters.
-        if(screen == parentContext.getString(R.string.master_list))
+        GroceryViewHolder GroceryViewHolder = (GroceryViewHolder) holder;
+        GroceryViewHolder.getTvDescription().setText(displayData.get(position).getDescription());
+
+        if(displayData.get(position).getChecked() == 1)
         {
-            // Display Every Item on master List.
-            ActorViewHolder actorViewHolder = (ActorViewHolder) holder;
-            actorViewHolder.getTvDescription().setText(groceryData.get(position).getDescription());
-
-            if(groceryData.get(position).getIsOnShoppingList() == 1)
-            {
-                actorViewHolder.getChkOnShoppingList().setChecked(true);
-            } else
-            {
-                actorViewHolder.getChkOnShoppingList().setChecked(false);
-            }
-        }
-        else
+            GroceryViewHolder.getChkOnShoppingList().setChecked(true);
+        } else
         {
-            // Only display if the item is really on the shopping list.
-            if(groceryData.get(position).getIsOnShoppingList() == 1)
-            {
-                ActorViewHolder actorViewHolder = (ActorViewHolder) holder;
-                actorViewHolder.getTvDescription().setText(groceryData.get(position).getDescription());
-                if(groceryData.get(position).getIsInCart() == 1)
-                {
-                    actorViewHolder.getChkOnShoppingList().setChecked(true);
-                } else
-                {
-                    actorViewHolder.getChkOnShoppingList().setChecked(false);
-                }
-            }
-            else
-            {
-               // actorViewHolder.getTvDescription().setText("Test");
-            }
-
-
+            GroceryViewHolder.getChkOnShoppingList().setChecked(false);
         }
-
-
 
     }
 
     @Override
     public int getItemCount() {
-        return groceryData.size();
+        return displayData.size();
     }
 }
