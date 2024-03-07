@@ -1,6 +1,5 @@
 package edu.ddb.grocerylist;
 import android.content.Context;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +18,7 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
     private ArrayList<GroceryItem> masterListData;
     private ArrayList<DisplayItem> displayData;
     public String screen;
-    private View.OnClickListener onItemClickListener;
-    private CompoundButton.OnCheckedChangeListener onCheckedChangeListener;
+    private View.OnClickListener onItemChkBoxClickListener;
 
     public static final String TAG = "GroceryItemAdapter";
 
@@ -41,8 +39,8 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
             // code involving with clicking an item in the list.
             itemView.setTag(this);
 
-            itemView.setOnClickListener(onItemClickListener);
-            chkOnShoppingList.setOnCheckedChangeListener(onCheckedChangeListener);
+
+            chkOnShoppingList.setOnClickListener(onItemChkBoxClickListener);
 
 
         }
@@ -67,16 +65,10 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
         parentContext = context;
     }
 
-    public void setOnItemClickListener(View.OnClickListener itemClickListener)
+    public void setOnItemChkBoxClickListener(View.OnClickListener itemClickListener)
     {
         Log.d(TAG, "setOnItemClickListener: ");
-        onItemClickListener = itemClickListener;
-    }
-
-    public void setOnCheckedChangeListener(CompoundButton.OnCheckedChangeListener checkedChangeListener)
-    {
-        Log.d(TAG, "setOnCheckedChangedListener: ");
-        onCheckedChangeListener = checkedChangeListener;
+        onItemChkBoxClickListener = itemClickListener;
     }
 
 
@@ -145,9 +137,6 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
                 }
             });
         }
-
-
-
     }
 
     @Override

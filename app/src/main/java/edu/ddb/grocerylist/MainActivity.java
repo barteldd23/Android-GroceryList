@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -32,8 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //CreateItems();
-        //WriteTextFile();
+        CreateItems();
+        WriteTextFile();
 
         ReadTextFile();
 
@@ -42,50 +41,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "onCheckedChanged: From the listener in main activity");
-            WriteTextFile();
-        }
-    };
-
-    private View.OnClickListener onClickListener_MasterList = new View.OnClickListener() {
+    private View.OnClickListener onCheckedClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) v.getTag();
-            CheckBox chkItem = v.findViewById(R.id.chkItem);
-
-
-            chkItem.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    WriteTextFile();
-                }
-            });
-
-            setMasterList(viewHolder, chkItem);
-
-        }
-
-        private void setMasterList(RecyclerView.ViewHolder viewHolder, CheckBox chkItem) {
-            // use the index to get an actor
-            int position = viewHolder.getAdapterPosition();
-            GroceryItem item = items.get(position);
-            Log.d(TAG, "onClick: " + item.toString());
-            // add code to startActivity of another activity. i.e. Detail screen.
-
-            if(items.get(position).getIsOnShoppingList() == 0)
-            {
-                items.get(position).setIsOnShoppingList(1);
-                chkItem.setChecked(true);
-
-            }
-            else
-            {
-                items.get(position).setIsOnShoppingList(0);
-                chkItem.setChecked(false);
-            }
+            CheckBox chkBox = v.findViewById(R.id.chkItem);
+            //boolean isChecked = chkBox.isChecked();
+            //chkBox.setChecked(isChecked);
+            WriteTextFile();
         }
     };
 
@@ -119,14 +81,10 @@ public class MainActivity extends AppCompatActivity {
         rvItems.setLayoutManager(layoutManager);
         GroceryItemAdapter groceryItemAdapter = new GroceryItemAdapter(items, displayItems, this, screen);
 
-        groceryItemAdapter.setOnCheckedChangeListener(onCheckedChangeListener);
-
-
-//        if(this.getTitle() == getString(R.string.master_list))
-//        {
-//            groceryItemAdapter.setOnItemClickListener(onClickListener_MasterList);
-//        }
-
+        //This listener listens for a tap on the checkbox. then it manually changes the checkbox
+        //That triggers the checkchange that is created in the adapter.
+        //Then this clickListener writes to the file.
+        groceryItemAdapter.setOnItemChkBoxClickListener(onCheckedClickListener);
 
         rvItems.setAdapter(groceryItemAdapter);
     }
@@ -171,26 +129,74 @@ public class MainActivity extends AppCompatActivity {
         {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
             // If on master - add to list with item|0|0
-            addItemDialog();
+            addItemDialog(this.getTitle().toString());
             // If on shopping - add to list with item|1|0
 
         } else if (id == R.id.clear_all)
         {
             Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
-            // Remove all from list
+            // If on Master make all items : item|0|0
+            if(this.getTitle() == getString(R.string.master_list))
+            {
+                for(GroceryItem groceryItem : items)
+                {
+                    groceryItem.setIsOnShoppingList(0);
+                    groceryItem.setIsInCart(0);
+                }
+            }
+            else // If on Shopping List, change all those items to item|1|0
+            {
+                for(GroceryItem groceryItem : items)
+                {
+                    groceryItem.setIsInCart(0);
+                }
+            }
+
             // write nothing to the file.
+            WriteTextFile();
+            RefreshList();
 
         } else if (id == R.id.delete_checked)
         {
+            Log.d(TAG, "onOptionsItemSelected: " + item.getTitle());
             // If on master - remove it from the list
-            // If on shopping - uncheck it on master item|0|0
+            if(this.getTitle() == getString(R.string.master_list))
+            {
+                Log.d(TAG, "onOptionsItemSelected: in the if Master");
+                for(int i = 0; i < items.size(); i++)
+                {
+                    GroceryItem groceryItem = items.get(i);
+                    if(groceryItem.getIsOnShoppingList() == 1)
+                    {
+
+                        items.remove(groceryItem);
+                        i--;
+                        Log.d(TAG, "onOptionsItemSelected: removed: " + groceryItem.toString());
+
+                    }
+                }
+            }
+            else // If on shopping - uncheck it on master item|0|0
+            {
+                for(GroceryItem groceryItem : items)
+                {
+                    if(groceryItem.getIsInCart() == 1)
+                    {
+                        groceryItem.setIsInCart(0);
+                        groceryItem.setIsOnShoppingList(0);
+                    }
+                }
+            }
+
             // re-write to file
+            WriteTextFile();
+            RefreshList();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void addItemDialog()
+    private void addItemDialog(String screen)
     {
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         final View addItemView = layoutInflater.inflate(R.layout.add_item_view, null);
@@ -210,8 +216,16 @@ public class MainActivity extends AppCompatActivity {
                                 String item = etItem.getText().toString();
 
                                 // Need to check if on master list page or not
-                                items.add(new GroceryItem(item));
-                                //items.add(new GroceryItem(item,1,0));
+                                if(screen == getString(R.string.master_list))
+                                {
+                                    items.add(new GroceryItem(item));
+                                }
+                                else
+                                {
+                                    items.add(new GroceryItem(item,1,0));
+                                }
+
+
 
                                 // Need to write to file.
                                 WriteTextFile();
