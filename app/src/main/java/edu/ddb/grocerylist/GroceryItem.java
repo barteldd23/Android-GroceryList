@@ -6,19 +6,40 @@ public class GroceryItem
 {
     public GroceryItem(String description)
     {
+        Id = -1;
         Description = description;
         IsOnShoppingList = 0;
         IsInCart = 0;
     }
     public GroceryItem(String description, int isOnShoppingList, int isInCart)
     {
+        Id = -1;
         Description = description;
         IsOnShoppingList = isOnShoppingList;
         IsInCart = isInCart;
     }
+    public GroceryItem(int id,String description, int isOnShoppingList, int isInCart)
+    {
+        Id = id;
+        Description = description;
+        IsOnShoppingList = isOnShoppingList;
+        IsInCart = isInCart;
+    }
+
+
+
+    private int Id;
     private String Description;
     private int IsOnShoppingList;
     private int IsInCart;
+
+    public int getId() {
+        return Id;
+    }
+
+    public void setId(int id) {
+        Id = id;
+    }
 
     public String getDescription() {
         return Description;
@@ -47,6 +68,6 @@ public class GroceryItem
     @NonNull
     public String toString()
     {
-        return Description + "|" + IsOnShoppingList + "|" + IsInCart;
+        return Id + "|" + Description + "|" + IsOnShoppingList + "|" + IsInCart;
     }
 }

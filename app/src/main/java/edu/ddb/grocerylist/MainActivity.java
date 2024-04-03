@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +26,10 @@ public class MainActivity extends AppCompatActivity {
     public static final String FILENAME = "data.txt";
     public static final String XMLFILENAME = "data.xml";
 
+    GroceryListDataSource dataSource = new GroceryListDataSource(this);
+
+
+
     // item| IsOnSHoppingList | IsInCart
     ArrayList<GroceryItem> items;
 
@@ -30,16 +37,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(TAG, "onCreate: Start Create");
 
-        CreateItems();
-        WriteTextFile();
 
-        ReadTextFile();
+
+        // This is to reset the datatable
+        //dataSource.open(true);
+        dataSource.open();
+
+        //ResetTable();
+        //CreateItems();
+        //WriteTextFile();
+
+        //GetItems();
+
+        //ReadTextFile();
 
         this.setTitle(getString(R.string.master_list));
+
+        // dataSource.get() is in refreshList()
         RefreshList();
 
+        Log.d(TAG, "onCreate: End Create");
+
     }
+
+
+
+
 
     private View.OnClickListener onCheckedClickListener = new View.OnClickListener() {
         @Override
@@ -47,13 +72,16 @@ public class MainActivity extends AppCompatActivity {
             CheckBox chkBox = v.findViewById(R.id.chkItem);
             //boolean isChecked = chkBox.isChecked();
             //chkBox.setChecked(isChecked);
-            WriteTextFile();
+            //WriteTextFile();
+
+            // Update database
         }
     };
 
     private void RefreshList() {
         // Bind the Recyclerview
         // Make a new list depending on the screen. Contains only description and whether it is checked.
+        items = dataSource.get();
         ArrayList<DisplayItem> displayItems = new ArrayList<DisplayItem>();
         if(this.getTitle() == getString(R.string.master_list))
         {
@@ -90,13 +118,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void CreateItems() {
-        items = new ArrayList<GroceryItem>();
-        GroceryItem item = new GroceryItem("Pizza");
-        items.add(item);
-        item = new GroceryItem("Bread");
-        items.add(item);
-        item = new GroceryItem("Cheese",1,0);
-        items.add(item);
+        //GroceryItem item = new GroceryItem("Pizza");
+        //items.add(item);
+        //item = new GroceryItem("Bread");
+        //items.add(item);
+        //item = new GroceryItem("Cheese",1,0);
+        //items.add(item);
     }
 
     @Override
@@ -213,22 +240,26 @@ public class MainActivity extends AppCompatActivity {
                                 Log.d(TAG, "onClick: OK");
                                 // need this addItemView before.findView because the view we made has the edit text we want.
                                 EditText etItem = addItemView.findViewById(R.id.etAddItem);
-                                String item = etItem.getText().toString();
+                                String itemDescription = etItem.getText().toString();
 
                                 // Need to check if on master list page or not
                                 if(screen == getString(R.string.master_list))
                                 {
-                                    items.add(new GroceryItem(item));
+                                    GroceryItem item = new GroceryItem(itemDescription);
+                                    dataSource.insert(item);
                                 }
                                 else
                                 {
-                                    items.add(new GroceryItem(item,1,0));
+                                    GroceryItem item = new GroceryItem(itemDescription,1,0);
+                                    dataSource.insert(item);
                                 }
+
+
 
 
 
                                 // Need to write to file.
-                                WriteTextFile();
+                                // WriteTextFile();
                                 // Need to repopulate the screen.
 
                                 RefreshList();
