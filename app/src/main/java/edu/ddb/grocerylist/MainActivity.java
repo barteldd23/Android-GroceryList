@@ -169,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     groceryItem.setIsOnShoppingList(0);
                     groceryItem.setIsInCart(0);
+                    dataSource.update(groceryItem);
                 }
             }
             else // If on Shopping List, change all those items to item|1|0
@@ -176,12 +177,13 @@ public class MainActivity extends AppCompatActivity {
                 for(GroceryItem groceryItem : items)
                 {
                     groceryItem.setIsInCart(0);
+                    dataSource.update(groceryItem);
                 }
             }
 
             // write nothing to the file.
-            WriteTextFile();
-            RefreshList();
+            //WriteTextFile();
+           RefreshList();
 
         } else if (id == R.id.delete_checked)
         {
@@ -198,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
                         items.remove(groceryItem);
                         i--;
+                        dataSource.delete(groceryItem.getId());
                         Log.d(TAG, "onOptionsItemSelected: removed: " + groceryItem.toString());
 
                     }
@@ -211,12 +214,13 @@ public class MainActivity extends AppCompatActivity {
                     {
                         groceryItem.setIsInCart(0);
                         groceryItem.setIsOnShoppingList(0);
+                        dataSource.update(groceryItem);
                     }
                 }
             }
 
             // re-write to file
-            WriteTextFile();
+            //WriteTextFile();
             RefreshList();
         }
 

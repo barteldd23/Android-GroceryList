@@ -50,7 +50,7 @@ public class GroceryListDataSource
         items.add(new GroceryItem("Cheese", 1, 0));
 
         // Delete and re-insert all the teams.
-        database.execSQL("delete from tblGroceryItem");
+        int rowsDeleted = deleteAll();
         int results = 0;
         Log.d(TAG, "refreshData: items count: " + items.size());
         for(GroceryItem item : items)
@@ -58,12 +58,35 @@ public class GroceryListDataSource
             results += insert(item);
         }
 
-      Log.d(TAG, "refreshData: End " + results + " rows Inserted...");
+      Log.d(TAG, "refreshData: End: "+ rowsDeleted + " rows Removed. " + results + " rows Inserted...");
     }
 
     public GroceryItem get(int id)
     {
-        return new GroceryItem("change");
+        GroceryItem item = null;
+
+        try
+        {
+            String sql = "select * from tblGroceryitem where Id=" + id;
+            Cursor cursor = database.rawQuery(sql,null);
+
+            cursor.moveToFirst();
+            while(!cursor.isAfterLast())
+            {
+                item = new GroceryItem(cursor.getInt(0),
+                                       cursor.getString(1),
+                                       cursor.getInt(2),
+                                       cursor.getInt(3));
+                Log.d(TAG, "get: " + item.toString());
+                cursor.moveToNext();
+            }
+        }
+        catch(Exception ex)
+        {
+            Log.d(TAG, "get: Error");
+        }
+
+        return item;
     }
 
     public ArrayList<GroceryItem> get()
@@ -104,12 +127,41 @@ public class GroceryListDataSource
 
     public int deleteAll()
     {
-        return 0;
+        int rows = 0;
+        Log.d(TAG, "deleteAll: Start");
+        try
+        {
+            String sql = "select * from tblGroceryItem";
+            Cursor cursor = database.rawQuery(sql,null);
+            rows = cursor.getCount();
+
+            sql = "delete from tblGroceryItem";
+            database.rawQuery(sql,null);
+        }
+        catch(Exception ex)
+        {
+            Log.d(TAG, "deleteAll: Error");
+        }
+        Log.d(TAG, "deleteAll: End");
+        return rows;
     }
 
     public int delete(int id)
     {
-        return 0;
+        int rows = 0;
+        Log.d(TAG, "delete(id): Start id=" + id);
+        try
+        {
+            String where = "id=" + id;
+            database.delete("tblGroceryItem",where,null);
+            rows = 1;
+        }
+        catch(Exception ex)
+        {
+            Log.d(TAG, "delete(id): Error");
+        }
+        Log.d(TAG, "delete(id): End. rows=" + rows);
+        return rows;
     }
 
     public int insert(GroceryItem item)
@@ -139,8 +191,28 @@ public class GroceryListDataSource
 
     }
 
-    public int update(GroceryItem team)
+    public int update(GroceryItem item)
     {
-        return 0;
+        Log.d(TAG, "update: Start");
+        int rows = 0;
+        
+        try
+        {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("Id", item.getId());
+            contentValues.put("Item", item.getDescription());
+            contentValues.put("IsOnShoppingList", item.getIsOnShoppingList());
+            contentValues.put("IsInCart", item.getIsInCart());
+
+            String where = "id=" + item.getId();
+            rows = database.update("tblGroceryItem",contentValues,where,null);
+            Log.d(TAG, "update: updated " + item.toString());
+        }
+        catch(Exception ex)
+        {
+            Log.d(TAG, "update: Error" + ex.getMessage());
+        }
+
+        return rows;
     }
 }

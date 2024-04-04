@@ -114,8 +114,9 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
                         masterListData.get(displayData.get(position).getMasterIndex()).setIsOnShoppingList(0);
 
                     }
-
-
+                    GroceryListDataSource dataSource = new GroceryListDataSource(parentContext);
+                    dataSource.open();
+                    dataSource.update(masterListData.get(displayData.get(position).getMasterIndex()));
                 }
             });
         }
@@ -134,8 +135,13 @@ public class  GroceryItemAdapter extends RecyclerView.Adapter {
                         displayData.get(position).setChecked(0);
                         masterListData.get(displayData.get(position).getMasterIndex()).setIsInCart(0);
                     }
+                    GroceryListDataSource dataSource = new GroceryListDataSource(parentContext);
+                    dataSource.open();
+                    dataSource.update(masterListData.get(displayData.get(position).getMasterIndex()));
                 }
             });
+
+
         }
     }
 
